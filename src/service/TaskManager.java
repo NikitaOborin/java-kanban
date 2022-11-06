@@ -1,7 +1,13 @@
+package service;
+
+import model.Epic;
+import model.Subtask;
+import model.Task;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Manager {
+public class TaskManager {
 
     protected HashMap<Integer, Task> tasks = new HashMap<>();
     protected HashMap<Integer, Epic> epics = new HashMap<>();
@@ -20,16 +26,20 @@ public class Manager {
         return new ArrayList<>(subtasks.values());
     }
 
-    public void deleteAllTasks() { // пункт ТЗ 2.2
+    public void deleteTasks() { // пункт ТЗ 2.2
         tasks.clear();
+        subtasks.clear();
     }
 
-    public void deleteAllEpics() { // пункт ТЗ 2.2
+    public void deleteEpics() { // пункт ТЗ 2.2
         epics.clear();
     }
 
-    public void deleteAllSubtasks() { // пункт ТЗ 2.2
+    public void deleteSubtasks() { // пункт ТЗ 2.2
         subtasks.clear();
+        for (Epic epic : epics.values()) {
+            epic.getSubtaskId().clear();
+        }
     }
 
     public Task getTask(int id) { // пункт ТЗ 2.3
@@ -62,22 +72,35 @@ public class Manager {
         subtask.setId(generatorId);
         subtasks.put(subtask.getId(),subtask);
         generatorId++;
-        Epic epic = epics.get(subtask.epicId);
+        Epic epic = epics.get(subtask.getEpicId());
         epic.addSubtaskId(subtask.getId());
     }
 
     public void updateTask(Task newTask) { // пункт ТЗ 2.5
-        tasks.put(newTask.getId(), newTask);
+        if (!tasks.containsKey(newTask.getId())) {
+            System.out.println("Такой задачи не существует!");
+        } else {
+            tasks.put(newTask.getId(), newTask);
+        }
+
     }
 
     public void updateEpic(Epic newEpic) { // пункт ТЗ 2.5
-        epics.put(newEpic.getId(), newEpic);
-        updateEpicStatus(newEpic.getId());
+        if (!epics.containsKey(newEpic.getId())) {
+            System.out.println("Такого эпика не существует!");
+        } else {
+            epics.put(newEpic.getId(), newEpic);
+            updateEpicStatus(newEpic.getId());
+        }
     }
 
     public void updateSubtask(Subtask newSubtask) { // пункт ТЗ 2.5
-        subtasks.put(newSubtask.getId(), newSubtask);
-        updateEpicStatus(newSubtask.getEpicId());
+        if (!subtasks.containsKey(newSubtask.getId())) {
+            System.out.println("Такой подзадачи не существует!");
+        } else {
+            subtasks.put(newSubtask.getId(), newSubtask);
+            updateEpicStatus(newSubtask.getEpicId());
+        }
     }
 
     public void deleteTask(int id) { // пункт ТЗ 2.6
@@ -85,10 +108,17 @@ public class Manager {
     }
 
     public void deleteEpic(int id) { // пункт ТЗ 2.6
+        for (int subtaskId : epics.get(id).getSubtaskId()) {
+            subtasks.remove(subtaskId);
+        }
         epics.remove(id);
     }
 
     public void deleteSubtask(int id) { // пункт ТЗ 2.6
+        int epicId =  subtasks.get(id).getEpicId();
+        ArrayList<Integer> subtaskId = epics.get(epicId).getSubtaskId();
+
+        subtaskId.remove(id);
         subtasks.remove(id);
     }
 
