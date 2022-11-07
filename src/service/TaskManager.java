@@ -28,11 +28,11 @@ public class TaskManager {
 
     public void deleteTasks() { // пункт ТЗ 2.2
         tasks.clear();
-        subtasks.clear();
     }
 
     public void deleteEpics() { // пункт ТЗ 2.2
         epics.clear();
+        subtasks.clear();
     }
 
     public void deleteSubtasks() { // пункт ТЗ 2.2
@@ -77,27 +77,20 @@ public class TaskManager {
     }
 
     public void updateTask(Task newTask) { // пункт ТЗ 2.5
-        if (!tasks.containsKey(newTask.getId())) {
-            System.out.println("Такой задачи не существует!");
-        } else {
+        if (tasks.containsKey(newTask.getId())) {
             tasks.put(newTask.getId(), newTask);
         }
-
     }
 
     public void updateEpic(Epic newEpic) { // пункт ТЗ 2.5
-        if (!epics.containsKey(newEpic.getId())) {
-            System.out.println("Такого эпика не существует!");
-        } else {
+        if (epics.containsKey(newEpic.getId())) {
             epics.put(newEpic.getId(), newEpic);
             updateEpicStatus(newEpic.getId());
         }
     }
 
     public void updateSubtask(Subtask newSubtask) { // пункт ТЗ 2.5
-        if (!subtasks.containsKey(newSubtask.getId())) {
-            System.out.println("Такой подзадачи не существует!");
-        } else {
+        if (subtasks.containsKey(newSubtask.getId())) {
             subtasks.put(newSubtask.getId(), newSubtask);
             updateEpicStatus(newSubtask.getEpicId());
         }
@@ -116,9 +109,9 @@ public class TaskManager {
 
     public void deleteSubtask(int id) { // пункт ТЗ 2.6
         int epicId =  subtasks.get(id).getEpicId();
-        ArrayList<Integer> subtaskId = epics.get(epicId).getSubtaskId();
+        ArrayList<Integer> subtasksId = epics.get(epicId).getSubtaskId();
 
-        subtaskId.remove(id);
+        subtasksId.remove(id);
         subtasks.remove(id);
     }
 
