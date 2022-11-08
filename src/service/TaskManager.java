@@ -54,26 +54,29 @@ public class TaskManager {
         return subtasks.get(id);
     }
 
-    public void addNewTask(Task task) { // пункт ТЗ 2.4
+    public int addNewTask(Task task) { // пункт ТЗ 2.4
         task.setId(generatorId);
         tasks.put(task.getId(), task);
         generatorId++;
+        return task.getId();
     }
 
-    public void addNewEpic(Epic epic) { // пункт ТЗ 2.4
+    public int addNewEpic(Epic epic) { // пункт ТЗ 2.4
         epic.setId(generatorId);
         epics.put(epic.getId(), epic);
         generatorId++;
 
         updateEpicStatus(epic.getId());
+        return epic.getId();
     }
 
-    public void addNewSubtask(Subtask subtask) { // пункт ТЗ 2.4
+    public int addNewSubtask(Subtask subtask) { // пункт ТЗ 2.4
         subtask.setId(generatorId);
         subtasks.put(subtask.getId(),subtask);
         generatorId++;
         Epic epic = epics.get(subtask.getEpicId());
         epic.addSubtaskId(subtask.getId());
+        return subtask.getId();
     }
 
     public void updateTask(Task newTask) { // пункт ТЗ 2.5
