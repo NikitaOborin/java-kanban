@@ -10,7 +10,6 @@ import java.util.HashMap;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
     protected HashMap<Integer, Task> tasks = new HashMap<>();
     protected HashMap<Integer, Epic> epics = new HashMap<>();
     protected HashMap<Integer, Subtask> subtasks = new HashMap<>();
@@ -52,19 +51,19 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTask(int id) {
-        inMemoryHistoryManager.add(tasks.get(id));
+        Managers.inMemoryHistoryManager.add(tasks.get(id));
         return tasks.get(id);
     }
 
     @Override
     public Epic getEpic(int id) {
-        inMemoryHistoryManager.add(epics.get(id));
+        Managers.inMemoryHistoryManager.add(epics.get(id));
         return epics.get(id);
     }
 
     @Override
     public Subtask getSubtask(int id) {
-        inMemoryHistoryManager.add(subtasks.get(id));
+        Managers.inMemoryHistoryManager.add(subtasks.get(id));
         return subtasks.get(id);
     }
 
