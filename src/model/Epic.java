@@ -22,10 +22,6 @@ public class Epic extends Task {
         subtaskId.add(id);
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

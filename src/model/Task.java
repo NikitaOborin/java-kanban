@@ -6,7 +6,7 @@ public class Task {
     protected int id;
     protected String name;
     protected String description;
-    protected String status;
+    protected Status status;
 
     public Task(String name, String description) { // конструктор для эпиков, без возможности задать статус
         this.name = name;
@@ -19,13 +19,13 @@ public class Task {
         this.description = description;
     }
 
-    public Task(String name, String description, String status) {
+    public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
         this.status = status;
     }
 
-    public Task(int id, String name, String description, String status) {
+    public Task(int id, String name, String description, Status status) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -40,7 +40,7 @@ public class Task {
         this.id = id;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
