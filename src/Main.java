@@ -43,7 +43,6 @@ public class Main {
         inMemoryTaskManager.getSubtask(subtaskId1);
         inMemoryTaskManager.getSubtask(subtaskId2);
 
-        System.out.println(Managers.getDefaultHistory().getHistory());
-
+        System.out.println(inMemoryTaskManager.getHistory());
     }
 }
