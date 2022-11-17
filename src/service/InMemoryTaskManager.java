@@ -12,13 +12,12 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    protected LinkedList<Task> history = new LinkedList<>();
-    protected HashMap<Integer, Task> tasks = new HashMap<>();
-    protected HashMap<Integer, Epic> epics = new HashMap<>();
-    protected HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private HashMap<Integer, Task> tasks = new HashMap<>();
+    private HashMap<Integer, Epic> epics = new HashMap<>();
+    private HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     private final HistoryManager historyManager = Managers.getDefaultHistory();
-    protected int generatorId = 1;
+    private int generatorId = 1;
 
     @Override
     public ArrayList<Task> getListOfTasks() {
