@@ -32,31 +32,47 @@ public class InMemoryHistoryManager implements HistoryManager {
         return tasks;
     }
 
+//    private void removeNode(Node<Task> taskNode) {                                      //рабочий, но неверный вариант
+//        Node<Task> currentNode = head;
+//        Node<Task> previousNode = null;
+//
+//        while (currentNode != null) {
+//
+//            if (currentNode.data == taskNode.data) {
+//                if (currentNode == head) {
+//                    head = currentNode.next;
+//                } else {
+//                    previousNode.next = currentNode.next;
+//                }
+//            }
+//
+//            previousNode = currentNode;
+//
+//            if (currentNode.next != null) {
+//                currentNode = currentNode.next;
+//            } else {
+//                currentNode = null;
+//            }
+//        }
+//    }
+
     private void removeNode(Node<Task> taskNode) {
-        Node<Task> currentNode = head;
-        Node<Task> previousNode = null;
+        if (taskNode == null) {
+            return;
+        }
 
-        while (currentNode != null) {
+        Node<Task> prev = taskNode.prev;    // prev и next всегда null, тк taskNode в конструкторе выставляет null полям
+        Node<Task> next = taskNode.next;    // нет понимания как быть с этим, нужно создать новый конструктор для Node?
 
-            if (currentNode.data == taskNode.data) {
-                if (currentNode == head) {
-                    head = currentNode.next;
-                } else {
-                    previousNode.next = currentNode.next;
-                }
-            }
-
-            previousNode = currentNode;
-
-            if (currentNode.next != null) {
-                currentNode = currentNode.next;
-            } else {
-                currentNode = null;
-            }
+        if (prev != null) {
+            prev.next = next;
+            next.prev = prev;
+        } else {
+            head = next;
         }
     }
 
-    @Override
+        @Override
     public void add(Task task) {
         if (task == null) {
             return;

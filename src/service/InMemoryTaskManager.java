@@ -11,9 +11,9 @@ import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private HashMap<Integer, Task> tasks = new HashMap<>();
-    private HashMap<Integer, Epic> epics = new HashMap<>();
-    private HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private final HashMap<Integer, Task> tasks = new HashMap<>();
+    private final HashMap<Integer, Epic> epics = new HashMap<>();
+    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     private final HistoryManager historyManager = Managers.getDefaultHistory();
     private int generatorId = 1;
@@ -36,7 +36,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteTasks() {
         for (Task task : tasks.values()) {
-            historyManager.remove(task.getId());                                     // чистим историю просмотров по ТЗ5
+            historyManager.remove(task.getId());
         }
         tasks.clear();
     }
@@ -44,11 +44,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteEpics() {
         for (Epic epic : epics.values()) {
-            historyManager.remove(epic.getId());                                     // чистим историю просмотров по ТЗ5
+            historyManager.remove(epic.getId());
         }
 
         for (Subtask subtask : subtasks.values()) {
-            historyManager.remove(subtask.getId());                                  // чистим историю просмотров по ТЗ5
+            historyManager.remove(subtask.getId());
         }
         epics.clear();
         subtasks.clear();
@@ -57,7 +57,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteSubtasks() {
         for (Subtask subtask : subtasks.values()) {
-            historyManager.remove(subtask.getId());                                  // чистим историю просмотров по ТЗ5
+            historyManager.remove(subtask.getId());
         }
 
         subtasks.clear();
@@ -138,16 +138,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTask(int id) {
-        historyManager.remove(id);                                                   // чистим историю просмотров по ТЗ5
+        historyManager.remove(id);
         tasks.remove(id);
     }
 
     @Override
     public void deleteEpic(int id) {
-        historyManager.remove(id);                                                   // чистим историю просмотров по ТЗ5
+        historyManager.remove(id);
 
         for (int subtaskId : epics.get(id).getSubtaskId()) {
-            historyManager.remove(subtaskId);                                        // чистим историю просмотров по ТЗ5
+            historyManager.remove(subtaskId);
             subtasks.remove(subtaskId);
         }
         epics.remove(id);
@@ -155,7 +155,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubtask(int id) {
-        historyManager.remove(id);                                                   // чистим историю просмотров по ТЗ5
+        historyManager.remove(id);
 
         int epicId =  subtasks.get(id).getEpicId();
         ArrayList<Integer> subtasksId = epics.get(epicId).getSubtaskId();
