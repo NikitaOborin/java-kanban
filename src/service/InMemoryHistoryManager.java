@@ -10,8 +10,8 @@ public class InMemoryHistoryManager implements HistoryManager {
     private final Map<Integer, Node<Task>> linkedHashMapForTask = new HashMap<>();
 
     private void linkLast(Task task) {
-        Node<Task> newNode = new Node<>(task);
         Node<Task> oldTail = tail;
+        Node<Task> newNode = new Node<>(task, oldTail, null);
 
         tail = newNode;
         if (oldTail == null) {
@@ -19,10 +19,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         } else {
             oldTail.next = newNode;
         }
+
+        linkedHashMapForTask.put(task.getId(), newNode);
     }
 
     private List<Task> getTasks() {
         Node<Task> currentNode = head;
+
         List<Task> tasks = new ArrayList<>();
 
         while (currentNode != null) {
@@ -32,60 +35,40 @@ public class InMemoryHistoryManager implements HistoryManager {
         return tasks;
     }
 
-//    private void removeNode(Node<Task> taskNode) {                                      //рабочий, но неверный вариант
-//        Node<Task> currentNode = head;
-//        Node<Task> previousNode = null;
-//
-//        while (currentNode != null) {
-//
-//            if (currentNode.data == taskNode.data) {
-//                if (currentNode == head) {
-//                    head = currentNode.next;
-//                } else {
-//                    previousNode.next = currentNode.next;
-//                }
-//            }
-//
-//            previousNode = currentNode;
-//
-//            if (currentNode.next != null) {
-//                currentNode = currentNode.next;
-//            } else {
-//                currentNode = null;
-//            }
-//        }
-//    }
-
     private void removeNode(Node<Task> taskNode) {
         if (taskNode == null) {
             return;
         }
 
-        Node<Task> prev = taskNode.prev;    // prev и next всегда null, тк taskNode в конструкторе выставляет null полям
-        Node<Task> next = taskNode.next;    // нет понимания как быть с этим, нужно создать новый конструктор для Node?
+        Node<Task> next = taskNode.next;
+        Node<Task> prev = taskNode.prev;
 
-        if (prev != null) {
-            prev.next = next;
-            next.prev = prev;
-        } else {
+        if (prev == null) {
+            next.prev = null;
             head = next;
+        } else if (next == null) {
+            prev.next = null;
+            tail = prev;
+        } else {
+            next.prev = taskNode.prev;
+            prev.next = taskNode.next;
         }
     }
 
-        @Override
+    @Override
     public void add(Task task) {
         if (task == null) {
             return;
         }
 
-        Node<Task> taskNode = new Node<>(task);
         if (linkedHashMapForTask.containsKey(task.getId())) {
+            Node<Task> taskNode = linkedHashMapForTask.get(task.getId());
             removeNode(taskNode);
-            linkLast(task);
-        } else {
-            linkLast(task);
+            linkedHashMapForTask.remove(task.getId());
         }
-        linkedHashMapForTask.put(task.getId(), taskNode);
+
+        linkLast(task);
+
     }
 
     @Override
