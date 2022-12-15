@@ -10,17 +10,14 @@ public class InMemoryHistoryManager implements HistoryManager {
     private final Map<Integer, Node<Task>> linkedHashMapForTask = new HashMap<>();
 
     private void linkLast(Task task) {
-        Node<Task> oldTail = tail;
-        Node<Task> newNode = new Node<>(task, oldTail, null);
+        Node<Task> newNode = new Node<>(task, tail, null);
 
-        tail = newNode;
-        if (oldTail == null) {
+        if (head == null) {
             head = newNode;
         } else {
-            oldTail.next = newNode;
+            tail.next = newNode;
         }
-
-        linkedHashMapForTask.put(task.getId(), newNode);
+        tail = newNode;
     }
 
     private List<Task> getTasks() {
@@ -62,13 +59,12 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
         if (linkedHashMapForTask.containsKey(task.getId())) {
-            Node<Task> taskNode = linkedHashMapForTask.get(task.getId());
+            Node<Task> taskNode = linkedHashMapForTask.remove(task.getId());
             removeNode(taskNode);
-            linkedHashMapForTask.remove(task.getId());
         }
 
         linkLast(task);
-
+        linkedHashMapForTask.put(task.getId(), tail);
     }
 
     @Override
