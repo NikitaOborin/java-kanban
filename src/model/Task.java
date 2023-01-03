@@ -8,25 +8,12 @@ public class Task {
     protected String description;
     protected Status status;
 
-    public Task(String name, String description) { // конструктор для эпиков, без возможности задать статус
-        this.name = name;
-        this.description = description;
-    }
-
-    public Task(int id, String name, String description) { // конструктор для эпиков, без возможности задать статус
-        this.id = id;
+    public Task(String name, String description) {
         this.name = name;
         this.description = description;
     }
 
     public Task(String name, String description, Status status) {
-        this.name = name;
-        this.description = description;
-        this.status = status;
-    }
-
-    public Task(int id, String name, String description, Status status) {
-        this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
@@ -38,6 +25,10 @@ public class Task {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     public void setStatus(Status status) {
@@ -60,11 +51,16 @@ public class Task {
 
     @Override
     public String toString() {
-        return "model.Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status='" + status + '\'' +
-                '}';
+        return String.format("%s,%s,%s,%s,%s", id, TypeOfTasks.TASK, name, status, description);
     }
+
+//    @Override
+//    public String toString() {
+//        return "model.Task{" +
+//                "id=" + id +
+//                ", name='" + name + '\'' +
+//                ", description='" + description + '\'' +
+//                ", status='" + status + '\'' +
+//                '}';
+//    }
 }

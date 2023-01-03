@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class InMemoryTaskManager implements TaskManager {
+public class InMemoryTasksManager implements TasksManager {
 
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, Epic> epics = new HashMap<>();
@@ -17,6 +17,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     private final HistoryManager historyManager = Managers.getDefaultHistory();
     private int generatorId = 1;
+
+    public HistoryManager getHistoryManager() {
+        return historyManager;
+    }
 
     @Override
     public ArrayList<Task> getListOfTasks() {
@@ -179,7 +183,7 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
-    private void updateEpicStatus(int epicId) {
+    public void updateEpicStatus(int epicId) {
         Epic epic = epics.get(epicId);
         ArrayList<Integer> subtasksId = epic.getSubtaskId();
         int counterStatusNew = 0;

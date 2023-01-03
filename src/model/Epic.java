@@ -10,8 +10,8 @@ public class Epic extends Task {
         super(name, description);
     }
 
-    public Epic(int id, String name, String description) {
-        super(id, name, description);
+    public Epic(String name, String description, Status status) {
+        super(name, description, status);
     }
 
     public ArrayList<Integer> getSubtaskId() {
@@ -38,12 +38,17 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "model.Epic{" +
-                "subtaskId=" + subtaskId +
-                ", id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status='" + status + '\'' +
-                '}';
+        return String.format("%s,%s,%s,%s,%s", id, TypeOfTasks.EPIC, name, status, description);
     }
+
+//    @Override
+//    public String toString() {
+//        return "model.Epic{" +
+//                "subtaskId=" + subtaskId +
+//                ", id=" + id +
+//                ", name='" + name + '\'' +
+//                ", description='" + description + '\'' +
+//                ", status='" + status + '\'' +
+//                '}';
+//    }
 }

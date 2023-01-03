@@ -7,7 +7,7 @@ import model.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface TaskManager {
+public interface TasksManager {
     ArrayList<Task> getListOfTasks();
 
     ArrayList<Epic> getListOfEpics();
