@@ -1,7 +1,7 @@
 package service;
 
 import model.Epic;
-import model.Status;
+import model.TaskStatus;
 import model.Subtask;
 import model.Task;
 
@@ -191,15 +191,15 @@ public class InMemoryTasksManager implements TasksManager {
         int counterStatusInProgress = 0;
 
         if (subtasksId.isEmpty()) {
-            epic.setStatus(Status.NEW);
+            epic.setStatus(TaskStatus.NEW);
             return;
         }
 
         for (int subtaskId : subtasksId) {
             Subtask subtask = subtasks.get(subtaskId);
-            if (subtask.getStatus() == Status.NEW) {
+            if (subtask.getStatus() == TaskStatus.NEW) {
                 counterStatusNew += 1;
-            } else if (subtask.getStatus() == Status.DONE) {
+            } else if (subtask.getStatus() == TaskStatus.DONE) {
                 counterStatusDone += 1;
             } else {
                 counterStatusInProgress += 1;
@@ -207,11 +207,11 @@ public class InMemoryTasksManager implements TasksManager {
         }
 
         if (counterStatusDone == 0 && counterStatusInProgress == 0) {
-            epic.setStatus(Status.NEW);
+            epic.setStatus(TaskStatus.NEW);
         } else if (counterStatusNew == 0 && counterStatusInProgress == 0) {
-            epic.setStatus(Status.DONE);
+            epic.setStatus(TaskStatus.DONE);
         } else {
-            epic.setStatus(Status.IN_PROGRESS);
+            epic.setStatus(TaskStatus.IN_PROGRESS);
         }
     }
 }

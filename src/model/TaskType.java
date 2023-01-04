@@ -1,6 +1,6 @@
 package model;
 
-public enum TypeOfTasks {
+public enum TaskType {
     TASK,
     EPIC,
     SUBTASK
