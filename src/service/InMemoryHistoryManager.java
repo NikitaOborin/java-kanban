@@ -40,7 +40,10 @@ public class InMemoryHistoryManager implements HistoryManager {
         Node<Task> next = taskNode.next;
         Node<Task> prev = taskNode.prev;
 
-        if (prev == null) {
+        if (prev == null && next == null) {
+            head = null;
+            tail = null;
+        } else if (prev == null) {
             next.prev = null;
             head = next;
         } else if (next == null) {
@@ -50,6 +53,8 @@ public class InMemoryHistoryManager implements HistoryManager {
             next.prev = taskNode.prev;
             prev.next = taskNode.next;
         }
+
+        linkedHashMapForTask.remove(taskNode.data.getId());
     }
 
     @Override

@@ -4,8 +4,11 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 public interface TasksManager {
     ArrayList<Task> getListOfTasks();
@@ -47,4 +50,12 @@ public interface TasksManager {
     ArrayList<Subtask> getSubtasksForEpic(int epicId);
 
     List<Task> getHistory();
+
+    void calculateDurationForEpic(Epic epic);
+
+    void calculateStartTimeForEpic(Epic epic);
+
+    void calculateEndTimeForEpic(Epic epic);
+
+    TreeSet<Task> getPrioritizedTasks();
 }

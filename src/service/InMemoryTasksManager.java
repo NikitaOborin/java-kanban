@@ -5,21 +5,115 @@ import model.TaskStatus;
 import model.Subtask;
 import model.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 
 public class InMemoryTasksManager implements TasksManager {
 
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    public InMemoryTasksManager() {
+        final LocalDateTime startPointOfPlanning = LocalDateTime.of(2022, 12, 1, 0, 0, 0);
+        LocalDateTime begin = startPointOfPlanning;
+        while (begin.isBefore(startPointOfPlanning.plusDays(365))) {
+            taskGrid.put(begin, true);
+            begin = begin.plusMinutes(15);
+        }
+    }
 
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
+    protected final HashMap<Integer, Task> tasks = new HashMap<>();
+    protected final HashMap<Integer, Epic> epics = new HashMap<>();
+    protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+
+    protected final HistoryManager historyManager = Managers.getDefaultHistory();
     private int generatorId = 1;
+
+    public HashMap<LocalDateTime, Boolean> taskGrid = new HashMap<>();
 
     public HistoryManager getHistoryManager() {
         return historyManager;
+    }
+
+    private boolean isCheckCrossing(Task task) {
+        boolean isCrossing = false;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
+        LocalDateTime startPoint = task.getStartTime();
+        if (task.getStartTime() != null) {
+            while (startPoint.isBefore(task.getStartTime().plus(task.getDuration()))) {
+                if (taskGrid.get(startPoint).equals(true)) {
+                    taskGrid.put(startPoint, false);
+                } else {
+                    System.out.println("Задача пересекается по времени с другой задачей во временной отметке"
+                            + startPoint.format(formatter));
+                    isCrossing = true;
+                }
+                startPoint = startPoint.plusMinutes(15);
+            }
+        }
+        return isCrossing;
+    }
+
+    @Override
+    public void calculateDurationForEpic(Epic epic) {
+        long totalDuration = 0;
+        if (!epic.getSubtaskId().isEmpty()) {
+            for (Integer subtasksId : epic.getSubtaskId()) {
+                long subtaskDurationToMinutes = subtasks.get(subtasksId).getDuration().toMinutes();
+                totalDuration = totalDuration + subtaskDurationToMinutes;
+            }
+            epic.setDuration(Duration.ofMinutes(totalDuration));
+        }
+    }
+
+    @Override
+    public void calculateStartTimeForEpic(Epic epic) {
+        List<Task> epicSubtask = new ArrayList<>();
+        StartTimeComparator startTimeComparator = new StartTimeComparator();
+        if (!epic.getSubtaskId().isEmpty()) {
+            for (Integer subtasksId : epic.getSubtaskId()) {
+                epicSubtask.add(subtasks.get(subtasksId));
+            }
+            epicSubtask.sort(startTimeComparator);
+            epic.setStartTime(epicSubtask.get(0).getStartTime());
+        }
+    }
+    @Override
+    public void calculateEndTimeForEpic(Epic epic) {
+        List<Task> subtasksOfEpic = new ArrayList<>();
+        StartTimeComparator startTimeComparator = new StartTimeComparator();
+        if (!epic.getSubtaskId().isEmpty()) {
+            for (Integer subtasksId : epic.getSubtaskId()) {
+                subtasksOfEpic.add(subtasks.get(subtasksId));
+            }
+            subtasksOfEpic.sort(startTimeComparator);
+            epic.setEndTime(subtasksOfEpic.get(subtasksOfEpic.size() - 1).getEndTime());
+        }
+    }
+
+    @Override
+    public TreeSet<Task> getPrioritizedTasks() {
+        StartTimeComparator startTimeComparator = new StartTimeComparator();
+        List<Task> allTasks = new ArrayList<>();
+
+        for (Task task : tasks.values()) {
+            if (!allTasks.contains(task))
+                allTasks.add(task);
+        }
+        for (Subtask subtask : subtasks.values()) {
+            if (!allTasks.contains(subtask))
+                allTasks.add(subtask);
+        }
+        for (Epic epic : epics.values()) {
+            if (!allTasks.contains(epic))
+                allTasks.add(epic);
+        }
+
+        TreeSet<Task> allTasksSet = new TreeSet<>(startTimeComparator);
+        allTasksSet.addAll(allTasks);
+        return allTasksSet;
     }
 
     @Override
@@ -91,52 +185,89 @@ public class InMemoryTasksManager implements TasksManager {
 
     @Override
     public int addNewTask(Task task) {
-        task.setId(generatorId);
-        tasks.put(task.getId(), task);
-        generatorId++;
-        return task.getId();
+        if (!isCheckCrossing(task)) {
+            task.setId(generatorId);
+            tasks.put(task.getId(), task);
+            generatorId++;
+            return task.getId();
+        } else {
+            System.out.println("Задача не добавлена");
+            return -1;
+        }
     }
 
     @Override
     public int addNewEpic(Epic epic) {
-        epic.setId(generatorId);
-        epics.put(epic.getId(), epic);
-        generatorId++;
+        if (!isCheckCrossing(epic)) {
+            epic.setId(generatorId);
+            epics.put(epic.getId(), epic);
+            generatorId++;
 
-        updateEpicStatus(epic.getId());
-        return epic.getId();
+            if (!epic.getSubtaskId().isEmpty()) {
+                calculateStartTimeForEpic(epic);
+                calculateDurationForEpic(epic);
+                calculateEndTimeForEpic(epic);
+            }
+
+            updateEpicStatus(epic.getId());
+            return epic.getId();
+        } else {
+            System.out.println("Задача не добавлена");
+            return -1;
+        }
     }
 
     @Override
     public int addNewSubtask(Subtask subtask) {
-        subtask.setId(generatorId);
-        subtasks.put(subtask.getId(),subtask);
-        generatorId++;
-        Epic epic = epics.get(subtask.getEpicId());
-        epic.addSubtaskId(subtask.getId());
-        return subtask.getId();
+        if (!isCheckCrossing(subtask)) {
+            subtask.setId(generatorId);
+            subtasks.put(subtask.getId(),subtask);
+            generatorId++;
+            Epic epic = epics.get(subtask.getEpicId());
+            epic.addSubtaskId(subtask.getId());
+
+            updateEpicStatus(epic.getId());
+            return subtask.getId();
+        } else {
+            System.out.println("Задача не добавлена");
+            return -1;
+        }
     }
 
     @Override
     public void updateTask(Task newTask) {
-        if (tasks.containsKey(newTask.getId())) {
-            tasks.put(newTask.getId(), newTask);
+        if (!isCheckCrossing(newTask)) {
+            if (tasks.containsKey(newTask.getId())) {
+                tasks.put(newTask.getId(), newTask);
+            }
+        } else {
+            System.out.println("Задача не обновлена");
         }
     }
 
     @Override
     public void updateEpic(Epic newEpic) {
-        if (epics.containsKey(newEpic.getId())) {
-            epics.put(newEpic.getId(), newEpic);
-            updateEpicStatus(newEpic.getId());
+        if (!isCheckCrossing(newEpic)) {
+            if (epics.containsKey(newEpic.getId())) {
+                epics.put(newEpic.getId(), newEpic);
+                updateEpicStatus(newEpic.getId());
+
+            }
+        } else {
+            System.out.println("Задача не обновлена");
         }
     }
 
     @Override
     public void updateSubtask(Subtask newSubtask) {
-        if (subtasks.containsKey(newSubtask.getId())) {
-            subtasks.put(newSubtask.getId(), newSubtask);
-            updateEpicStatus(newSubtask.getEpicId());
+        if (!isCheckCrossing(newSubtask)) {
+            if (subtasks.containsKey(newSubtask.getId())) {
+                subtasks.put(newSubtask.getId(), newSubtask);
+                updateEpicStatus(newSubtask.getEpicId());
+
+            }
+        } else {
+            System.out.println("Задача не обновлена");
         }
     }
 
@@ -148,12 +279,13 @@ public class InMemoryTasksManager implements TasksManager {
 
     @Override
     public void deleteEpic(int id) {
-        historyManager.remove(id);
-
         for (int subtaskId : epics.get(id).getSubtaskId()) {
             historyManager.remove(subtaskId);
             subtasks.remove(subtaskId);
         }
+
+        historyManager.remove(id);
+
         epics.remove(id);
     }
 
@@ -164,7 +296,7 @@ public class InMemoryTasksManager implements TasksManager {
         int epicId =  subtasks.get(id).getEpicId();
         ArrayList<Integer> subtasksId = epics.get(epicId).getSubtaskId();
 
-        subtasksId.remove(id);
+        subtasksId.remove((Integer) id);
         subtasks.remove(id);
     }
 
@@ -183,7 +315,7 @@ public class InMemoryTasksManager implements TasksManager {
         return historyManager.getHistory();
     }
 
-    public void updateEpicStatus(int epicId) {
+    protected void updateEpicStatus(int epicId) {
         Epic epic = epics.get(epicId);
         ArrayList<Integer> subtasksId = epic.getSubtaskId();
         int counterStatusNew = 0;

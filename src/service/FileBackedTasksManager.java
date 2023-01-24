@@ -1,5 +1,6 @@
 package service;
 
+import exeption.ManagerSaveException;
 import model.*;
 
 import java.io.*;
@@ -7,13 +8,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTasksManager {
-    private final HashMap<Integer, Task> tasks = new HashMap<>();
-    private final HashMap<Integer, Epic> epics = new HashMap<>();
-    private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+
     protected final Path file;
     private static final String HEAD = "id,type,name,status,description,epic";
 
@@ -78,16 +76,19 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
             }
 
             String lineHistory = fileReader.readLine();
-            for (int id : historyFromString(lineHistory)) {
-                if (fileBackedTasksManager.tasks.containsKey(id)) {
-                    Task task = fileBackedTasksManager.tasks.get(id);
-                    fileBackedTasksManager.getHistoryManager().add(task);
-                } else if (fileBackedTasksManager.epics.containsKey(id)) {
-                    Epic epic = fileBackedTasksManager.epics.get(id);
-                    fileBackedTasksManager.getHistoryManager().add(epic);
-                } else if (fileBackedTasksManager.subtasks.containsKey(id)) {
-                    Subtask subtask = fileBackedTasksManager.subtasks.get(id);
-                    fileBackedTasksManager.getHistoryManager().add(subtask);
+
+            if (lineHistory != null) {
+                for (int id : historyFromString(lineHistory)) {
+                    if (fileBackedTasksManager.tasks.containsKey(id)) {
+                        Task task = fileBackedTasksManager.tasks.get(id);
+                        fileBackedTasksManager.getHistoryManager().add(task);
+                    } else if (fileBackedTasksManager.epics.containsKey(id)) {
+                        Epic epic = fileBackedTasksManager.epics.get(id);
+                        fileBackedTasksManager.getHistoryManager().add(epic);
+                    } else if (fileBackedTasksManager.subtasks.containsKey(id)) {
+                        Subtask subtask = fileBackedTasksManager.subtasks.get(id);
+                        fileBackedTasksManager.getHistoryManager().add(subtask);
+                    }
                 }
             }
         } catch (IOException e) {
