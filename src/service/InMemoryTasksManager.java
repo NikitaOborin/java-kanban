@@ -57,39 +57,25 @@ public class InMemoryTasksManager implements TasksManager {
     }
 
     @Override
-    public void calculateDurationForEpic(Epic epic) {
+    public void calculateDurationStartTimeEndTimeForEpic(Epic epic) {
         long totalDuration = 0;
+        List<Task> epicSubtasks = new ArrayList<>();
+        StartTimeComparator startTimeComparator = new StartTimeComparator();
+
         if (!epic.getSubtaskId().isEmpty()) {
             for (Integer subtasksId : epic.getSubtaskId()) {
+                //часть для calculateDuration
                 long subtaskDurationToMinutes = subtasks.get(subtasksId).getDuration().toMinutes();
                 totalDuration = totalDuration + subtaskDurationToMinutes;
+
+                //часть для calculateStartTimeEndTime
+                epicSubtasks.add(subtasks.get(subtasksId));
             }
             epic.setDuration(Duration.ofMinutes(totalDuration));
-        }
-    }
 
-    @Override
-    public void calculateStartTimeForEpic(Epic epic) {
-        List<Task> epicSubtask = new ArrayList<>();
-        StartTimeComparator startTimeComparator = new StartTimeComparator();
-        if (!epic.getSubtaskId().isEmpty()) {
-            for (Integer subtasksId : epic.getSubtaskId()) {
-                epicSubtask.add(subtasks.get(subtasksId));
-            }
-            epicSubtask.sort(startTimeComparator);
-            epic.setStartTime(epicSubtask.get(0).getStartTime());
-        }
-    }
-    @Override
-    public void calculateEndTimeForEpic(Epic epic) {
-        List<Task> subtasksOfEpic = new ArrayList<>();
-        StartTimeComparator startTimeComparator = new StartTimeComparator();
-        if (!epic.getSubtaskId().isEmpty()) {
-            for (Integer subtasksId : epic.getSubtaskId()) {
-                subtasksOfEpic.add(subtasks.get(subtasksId));
-            }
-            subtasksOfEpic.sort(startTimeComparator);
-            epic.setEndTime(subtasksOfEpic.get(subtasksOfEpic.size() - 1).getEndTime());
+            epicSubtasks.sort(startTimeComparator);
+            epic.setStartTime(epicSubtasks.get(0).getStartTime());
+            epic.setEndTime(epicSubtasks.get(epicSubtasks.size() - 1).getEndTime());
         }
     }
 
@@ -203,12 +189,6 @@ public class InMemoryTasksManager implements TasksManager {
             epics.put(epic.getId(), epic);
             generatorId++;
 
-            if (!epic.getSubtaskId().isEmpty()) {
-                calculateStartTimeForEpic(epic);
-                calculateDurationForEpic(epic);
-                calculateEndTimeForEpic(epic);
-            }
-
             updateEpicStatus(epic.getId());
             return epic.getId();
         } else {
@@ -225,6 +205,10 @@ public class InMemoryTasksManager implements TasksManager {
             generatorId++;
             Epic epic = epics.get(subtask.getEpicId());
             epic.addSubtaskId(subtask.getId());
+
+            if (!epic.getSubtaskId().isEmpty()) {
+                calculateDurationStartTimeEndTimeForEpic(epic);
+            }
 
             updateEpicStatus(epic.getId());
             return subtask.getId();
@@ -251,7 +235,6 @@ public class InMemoryTasksManager implements TasksManager {
             if (epics.containsKey(newEpic.getId())) {
                 epics.put(newEpic.getId(), newEpic);
                 updateEpicStatus(newEpic.getId());
-
             }
         } else {
             System.out.println("Задача не обновлена");
@@ -263,8 +246,13 @@ public class InMemoryTasksManager implements TasksManager {
         if (!isCheckCrossing(newSubtask)) {
             if (subtasks.containsKey(newSubtask.getId())) {
                 subtasks.put(newSubtask.getId(), newSubtask);
-                updateEpicStatus(newSubtask.getEpicId());
 
+                Epic epic = epics.get(newSubtask.getEpicId());
+                if (!epic.getSubtaskId().isEmpty()) {
+                    calculateDurationStartTimeEndTimeForEpic(epic);
+                }
+
+                updateEpicStatus(newSubtask.getEpicId());
             }
         } else {
             System.out.println("Задача не обновлена");
@@ -297,6 +285,12 @@ public class InMemoryTasksManager implements TasksManager {
         ArrayList<Integer> subtasksId = epics.get(epicId).getSubtaskId();
 
         subtasksId.remove((Integer) id);
+
+        Epic epic = epics.get(epicId);
+        if (!epic.getSubtaskId().isEmpty()) {
+            calculateDurationStartTimeEndTimeForEpic(epic);
+        }
+
         subtasks.remove(id);
     }
 

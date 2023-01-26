@@ -51,11 +51,7 @@ public interface TasksManager {
 
     List<Task> getHistory();
 
-    void calculateDurationForEpic(Epic epic);
-
-    void calculateStartTimeForEpic(Epic epic);
-
-    void calculateEndTimeForEpic(Epic epic);
+    void calculateDurationStartTimeEndTimeForEpic(Epic epic);
 
     TreeSet<Task> getPrioritizedTasks();
 }

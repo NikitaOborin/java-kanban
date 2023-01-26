@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import service.Managers;
 import service.TasksManager;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class EpicStatusTest {
@@ -30,8 +33,10 @@ class EpicStatusTest {
 
     @Test
     public void shouldNewEpicStatusBySubtasksWithNewStatus() {
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW, epicId1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 10, 15, 0), epicId1);
+        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 11, 15, 0), epicId1);
         int subtaskId1 = inMemoryTaskManager.addNewSubtask(subtask1);
         int subtaskId2 = inMemoryTaskManager.addNewSubtask(subtask2);
         assertEquals(TaskStatus.NEW, inMemoryTaskManager.getEpic(epicId1).getStatus());
@@ -39,8 +44,10 @@ class EpicStatusTest {
 
     @Test
     public void shouldDoneEpicStatusBySubtasksWithDoneStatus() {
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.DONE, epicId1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.DONE, epicId1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.DONE,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 10, 15, 0), epicId1);
+        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.DONE,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 11, 15, 0), epicId1);
         int subtaskId1 = inMemoryTaskManager.addNewSubtask(subtask1);
         int subtaskId2 = inMemoryTaskManager.addNewSubtask(subtask2);
         assertEquals(TaskStatus.DONE, inMemoryTaskManager.getEpic(epicId1).getStatus());
@@ -48,8 +55,10 @@ class EpicStatusTest {
 
     @Test
     public void shouldInProgressEpicStatusBySubtasksWithNewAndDoneStatus() {
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.DONE, epicId1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 10, 15, 0), epicId1);
+        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.DONE,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 11, 15, 0), epicId1);
         int subtaskId1 = inMemoryTaskManager.addNewSubtask(subtask1);
         int subtaskId2 = inMemoryTaskManager.addNewSubtask(subtask2);
         assertEquals(TaskStatus.IN_PROGRESS, inMemoryTaskManager.getEpic(epicId1).getStatus());
@@ -57,8 +66,10 @@ class EpicStatusTest {
 
     @Test
     public void shouldInProgressEpicStatusBySubtasksWithInProgressStatus() {
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.IN_PROGRESS, epicId1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.IN_PROGRESS, epicId1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.IN_PROGRESS,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 10, 15, 0), epicId1);
+        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.IN_PROGRESS,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 11, 15, 0), epicId1);
         int subtaskId1 = inMemoryTaskManager.addNewSubtask(subtask1);
         int subtaskId2 = inMemoryTaskManager.addNewSubtask(subtask2);
         assertEquals(TaskStatus.IN_PROGRESS, inMemoryTaskManager.getEpic(epicId1).getStatus());

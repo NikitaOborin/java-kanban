@@ -7,13 +7,15 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTasksManager {
 
     protected final Path file;
-    private static final String HEAD = "id,type,name,status,description,epic";
+    private static final String HEAD = "id,type,name,status,description,duration,startTime,endTime,epic";
 
     public FileBackedTasksManager(String path) {
         super();
@@ -105,18 +107,41 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
         final String name = valueArray[2];
         final TaskStatus status = TaskStatus.valueOf(valueArray[3]);
         final String description = valueArray[4];
+        final Duration duration;
+        final LocalDateTime startTime;
+        final LocalDateTime endTime;
+        final int epicId;
 
         if (TaskType.TASK.equals(type)) {
-            Task task = new Task(name, description, status);
+            duration = Duration.parse(valueArray[5]);
+            startTime = LocalDateTime.parse(valueArray[6]);
+
+            Task task = new Task(name, description, status, duration, startTime);
             task.setId(id);
+            task.setStartTime(startTime);
             return task;
         } else if (TaskType.EPIC.equals(type)) {
-            Task epic = new Epic(name, description, status);
+            Epic epic = new Epic(name, description, status);
             epic.setId(id);
-            return epic;
+
+            if (!(valueArray[5]).equals("null")) {
+                duration = Duration.parse(valueArray[5]);
+                startTime = LocalDateTime.parse(valueArray[6]);
+                endTime = LocalDateTime.parse(valueArray[7]);
+
+                epic.setDuration(duration);
+                epic.setStartTime(startTime);
+                epic.setEndTime(endTime);
+            }
+            return (Task) epic;
         } else {
-            Task subtask = new Subtask(name, description, status, Integer.parseInt(valueArray[5]));
+            duration = Duration.parse(valueArray[5]);
+            startTime = LocalDateTime.parse(valueArray[6]);
+            epicId = Integer.parseInt(valueArray[8]);
+
+            Task subtask = new Subtask(name, description, status, duration, startTime, epicId);
             subtask.setId(id);
+
             return subtask;
         }
     }
@@ -149,7 +174,10 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
         if (task instanceof Epic) {
             epics.put(task.getId(), (Epic) task);
         } else if (task instanceof Subtask) {
-            subtasks.put(task.getId(), (Subtask) task);
+            subtasks.put(task.getId(),(Subtask) task);
+
+            int epicId = ((Subtask) task).getEpicId();
+            epics.get(epicId).addSubtaskId(task.getId());
         } else {
             tasks.put(task.getId(), task);
         }

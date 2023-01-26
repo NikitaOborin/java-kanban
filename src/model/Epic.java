@@ -18,12 +18,6 @@ public class Epic extends Task {
         super(name, description, taskStatus);
     }
 
-    public Epic(String name, String description, TaskStatus taskStatus, Duration duration,
-                LocalDateTime startTime, ArrayList<Integer> subtaskId) {
-        super(name, description, taskStatus, duration, startTime);
-        this.subtaskId = subtaskId;
-    }
-
     public ArrayList<Integer> getSubtaskId() {
         return subtaskId;
     }
@@ -52,6 +46,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s", id, TaskType.EPIC, name, taskStatus, description);
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s",
+                id, TaskType.EPIC, name, taskStatus, description, duration, startTime, getEndTime());
     }
 }

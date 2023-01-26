@@ -4,6 +4,7 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.TaskStatus;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.TasksManager;
 
@@ -17,22 +18,52 @@ import static org.junit.jupiter.api.Assertions.*;
 abstract class TaskManagerTest<T extends TasksManager>  {
     T manager;
 
+    Task task1;
+    int taskId1;
+    Task task2;
+    int taskId2;
+    Epic epic1;
+    int epicId1;
+    Subtask subtask1;
+    Subtask subtask2;
+    int subtaskId1;
+    int subtaskId2;
+
+
+    public void initTasks() {
+        task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 1, 0));
+        task2 = new Task("Task #2", "Description: Task #2", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 2, 0));
+        taskId1 = manager.addNewTask(task1);
+        taskId2 = manager.addNewTask(task2);
+
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 4, 0), epicId1);
+        subtaskId1 = manager.addNewSubtask(subtask1);
+        subtaskId2 = manager.addNewSubtask(subtask2);
+    }
+
     @Test
     public void shouldEpicIdBySubtask() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
+        initTasks();
 
         assertEquals(manager.getSubtask(subtaskId1).getEpicId(), epicId1);
     }
 
     @Test
     public void shouldInProgressEpicStatusBySubtasksWithInProgressAndDoneStatus() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
         int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.IN_PROGRESS, epicId1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.DONE, epicId1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.IN_PROGRESS,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.DONE,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 4, 0), epicId1);
         int subtaskId1 = manager.addNewSubtask(subtask1);
         int subtaskId2 = manager.addNewSubtask(subtask2);
 
@@ -42,10 +73,7 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для ArrayList<Task> getListOfTasks()
     @Test
     public void shouldStandardBehaviorGetListOfTasks() {
-        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW);
-        Task task2 = new Task("Task #2", "Description: Task #2", TaskStatus.NEW);
-        int taskId1 = manager.addNewTask(task1);
-        int taskId2 = manager.addNewTask(task2);
+        initTasks();
 
         ArrayList<Task> expectedListOfTasks = new ArrayList<>();
         expectedListOfTasks.add(task1);
@@ -64,12 +92,7 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для ArrayList<Epic> getListOfEpics()
     @Test
     public void shouldStandardBehaviorGetListOfEpics() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
-        int subtaskId2 = manager.addNewSubtask(subtask2);
+        initTasks();
 
         ArrayList<Task> expectedListOfEpics = new ArrayList<>();
         expectedListOfEpics.add(epic1);
@@ -87,12 +110,7 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для ArrayList<Subtask> getListOfSubtasks()
     @Test
     public void shouldStandardBehaviorGetListOfSubtasks() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
-        int subtaskId2 = manager.addNewSubtask(subtask2);
+        initTasks();
 
         ArrayList<Subtask> expectedListOfSubtasks = new ArrayList<>();
         expectedListOfSubtasks.add(subtask1);
@@ -125,12 +143,15 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для void deleteEpics()
     @Test
     public void shouldStandardBehaviorDeleteEpics() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
-        int subtaskId2 = manager.addNewSubtask(subtask2);
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 13, 3, 0), epicId1);
+        subtaskId1 = manager.addNewSubtask(subtask1);
+        subtaskId2 = manager.addNewSubtask(subtask2);
+
         manager.deleteEpics();
 
         ArrayList<Epic> expectedEmptyListOfEpics = new ArrayList<>();
@@ -143,12 +164,14 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для void deleteSubtasks()
     @Test
     public void shouldStandardBehaviorDeleteSubtasks() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
-        int subtaskId2 = manager.addNewSubtask(subtask2);
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 13, 3, 0), epicId1);
+        subtaskId1 = manager.addNewSubtask(subtask1);
+        subtaskId2 = manager.addNewSubtask(subtask2);
         manager.deleteSubtasks();
 
         ArrayList<Subtask> expectedEmptyListOfSubtasks = new ArrayList<>();
@@ -205,10 +228,7 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для Subtask getSubtask(int id)
     @Test
     public void shouldStandardBehaviorGetSubtask() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
+        initTasks();
 
         assertEquals(subtask1, manager.getSubtask(subtaskId1));
     }
@@ -220,10 +240,11 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
     @Test
     public void shouldGetSubtaskBySubtaskIncorrectId() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtaskId1 = manager.addNewSubtask(subtask1);
 
         assertNull(manager.getSubtask(subtaskId1 + 1));
     }
@@ -284,11 +305,12 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
 //    тесты для int addNewSubtask(Subtask subtask)
     @Test
-    public void shouldStandardBehaviorAddNewSubtask() {                                                                ///
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
+    public void shouldStandardBehaviorAddNewSubtask() {
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtaskId1 = manager.addNewSubtask(subtask1);
 
         ArrayList<Integer> expectedEmptySubtaskId = new ArrayList<>();
         expectedEmptySubtaskId.add(subtaskId1);
@@ -299,10 +321,11 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
     @Test
     public void shouldAddNewSubtaskByEmptyListOfSubtasks() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtaskId1 = manager.addNewSubtask(subtask1);
 
         List<Subtask> subtasks = manager.getListOfSubtasks();
         assertNotNull(subtasks);
@@ -313,7 +336,8 @@ abstract class TaskManagerTest<T extends TasksManager>  {
     public void shouldAddNewSubtaskBySubtaskIncorrectId() {
         Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
         int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
         int subtaskId1 = manager.addNewSubtask(subtask1);
 
         assertNull(manager.getSubtask(subtaskId1 + 1));
@@ -400,12 +424,14 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для void updateSubtask(Subtask newSubtask)
     @Test
     public void shouldStandardBehaviorUpdateSubtask() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
         int subtaskId1 = manager.addNewSubtask(subtask1);
 
-        Subtask updateSubtask1 = new Subtask("updateSubtask #1-e1", "Description: updateSubtask #1-e1", TaskStatus.IN_PROGRESS, epicId1);
+        Subtask updateSubtask1 = new Subtask("updateSubtask #1-e1", "Description: updateSubtask #1-e1", TaskStatus.IN_PROGRESS,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 13, 3, 0), epicId1);
         updateSubtask1.setId(subtaskId1);
         manager.updateSubtask(updateSubtask1);
 
@@ -414,12 +440,14 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
     @Test
     public void shouldUpdateSubtaskByEmptyListOfSubtasks() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtaskId1 = manager.addNewSubtask(subtask1);
 
-        Subtask updateSubtask1 = new Subtask("updateSubtask #1-e1", "Description: updateSubtask #1-e1", TaskStatus.IN_PROGRESS, epicId1);
+        Subtask updateSubtask1 = new Subtask("updateSubtask #1-e1", "Description: updateSubtask #1-e1", TaskStatus.IN_PROGRESS,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 13, 3, 0), epicId1);
         updateSubtask1.setId(subtaskId1);
         manager.updateSubtask(updateSubtask1);
 
@@ -430,12 +458,14 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
     @Test
     public void shouldUpdateSubtaskBySubtaskIncorrectId() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtaskId1 = manager.addNewSubtask(subtask1);
 
-        Subtask updateSubtask1 = new Subtask("updateSubtask #1-e1", "Description: updateSubtask #1-e1", TaskStatus.IN_PROGRESS, epicId1);
+        Subtask updateSubtask1 = new Subtask("updateSubtask #1-e1", "Description: updateSubtask #1-e1", TaskStatus.IN_PROGRESS,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 13, 3, 0), epicId1);
         updateSubtask1.setId(subtaskId1);
         manager.updateSubtask(updateSubtask1);
 
@@ -470,7 +500,8 @@ abstract class TaskManagerTest<T extends TasksManager>  {
     public void shouldStandardBehaviorDeleteEpic() {
         Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
         int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
         int subtaskId1 = manager.addNewSubtask(subtask1);
         manager.deleteEpic(epicId1);
 
@@ -483,10 +514,11 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
     @Test
     public void shouldDeleteEpicByEpicIncorrectId() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
+        epic1 = new Epic("Epic #1", "Description: Epic #1");
+        epicId1 = manager.addNewEpic(epic1);
+        subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
+        subtaskId1 = manager.addNewSubtask(subtask1);
         manager.deleteEpic(epicId1);
 
         assertNull(manager.getEpic(epicId1 + 1));
@@ -497,7 +529,8 @@ abstract class TaskManagerTest<T extends TasksManager>  {
     public void shouldStandardBehaviorDeleteSubtask() {
         Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
         int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
         int subtaskId1 = manager.addNewSubtask(subtask1);
         manager.deleteSubtask(subtaskId1);
 
@@ -512,7 +545,8 @@ abstract class TaskManagerTest<T extends TasksManager>  {
     public void shouldDeleteSubtaskBySubtaskIncorrectId() {
         Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
         int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
         int subtaskId1 = manager.addNewSubtask(subtask1);
         manager.deleteSubtask(subtaskId1);
 
@@ -522,12 +556,7 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для ArrayList<Subtask> getSubtasksForEpic(int epicId)
     @Test
     public void shouldStandardBehaviorGetSubtasksForEpic() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW, epicId1);
-        int subtaskId2 = manager.addNewSubtask(subtask2);
+        initTasks();
 
         ArrayList<Subtask> expectedListOfSubtasks = new ArrayList<>();
         expectedListOfSubtasks.add(subtask1);
@@ -538,12 +567,7 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
     @Test
     public void shouldGetSubtasksForEpicByEmptyListOfSubtasks() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW, epicId1);
-        int subtaskId2 = manager.addNewSubtask(subtask2);
+        initTasks();
 
         List<Subtask> subtasks = manager.getListOfSubtasks();
         assertNotNull(subtasks);
@@ -552,12 +576,13 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
     @Test
     public void shouldGetSubtasksForEpicByEmptyListOfEpics() {
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
-        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW, epicId1);
-        int subtaskId2 = manager.addNewSubtask(subtask2);
+//        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
+//        int epicId1 = manager.addNewEpic(epic1);
+//        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
+//        int subtaskId1 = manager.addNewSubtask(subtask1);
+//        Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW, epicId1);
+//        int subtaskId2 = manager.addNewSubtask(subtask2);
+        initTasks();
 
         List<Epic> epics = manager.getListOfEpics();
         assertNotNull(epics);
@@ -567,12 +592,8 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для List<Task> getHistory()
     @Test
     public void shouldStandardBehaviorGetHistory() {
-        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW);
-        int taskId1 = manager.addNewTask(task1);
-        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
-        int epicId1 = manager.addNewEpic(epic1);
-        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW, epicId1);
-        int subtaskId1 = manager.addNewSubtask(subtask1);
+        initTasks();
+
         manager.getTask(taskId1);
         manager.getEpic(epicId1);
         manager.getSubtask(subtaskId1);
@@ -592,14 +613,14 @@ abstract class TaskManagerTest<T extends TasksManager>  {
         int epicId1 = manager.addNewEpic(epic1);
 
         Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
-                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 10, 15, 00), epicId1);
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 10, 15, 0), epicId1);
         int subtaskId1 = manager.addNewSubtask(subtask1);
 
         Subtask subtask2 = new Subtask("Subtask #2-e1", "Description: Subtask #2-e1", TaskStatus.NEW,
-                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 11, 15, 00), epicId1);
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 11, 15, 0), epicId1);
         int subtaskId2 = manager.addNewSubtask(subtask2);
 
-        manager.calculateDurationForEpic(manager.getEpic(epicId1));
+        manager.calculateDurationStartTimeEndTimeForEpic(manager.getEpic(epicId1));
         assertEquals(manager.getEpic(epicId1).getDuration().toMinutes(), 30);
     }
 
@@ -627,7 +648,7 @@ abstract class TaskManagerTest<T extends TasksManager>  {
     @Test
     public void shouldCalculateEndTimeWithDuration10() {
         Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(10),
-                LocalDateTime.of(2022, 12, 12, 12, 00));
+                LocalDateTime.of(2022, 12, 12, 12, 0));
         int taskId1 = manager.addNewTask(task1);
 
         LocalDateTime expectedTaskDuration = LocalDateTime.of(2022, 12, 12, 12, 10);
@@ -644,10 +665,10 @@ abstract class TaskManagerTest<T extends TasksManager>  {
     @Test
     public void shouldPrioritizedTasksWithTasks() {
         Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(10),
-                LocalDateTime.of(2022, 12, 12, 12, 00));
+                LocalDateTime.of(2022, 12, 12, 12, 0));
         int taskId1 = manager.addNewTask(task1);
         Task task2 = new Task("Task #2", "Description: Task #2", TaskStatus.NEW, Duration.ofMinutes(10),
-                LocalDateTime.of(2022, 12, 13, 12, 00));
+                LocalDateTime.of(2022, 12, 13, 12, 0));
         int taskId2 = manager.addNewTask(task2);
 
         assertEquals(manager.getPrioritizedTasks().first(), task1);
@@ -656,7 +677,7 @@ abstract class TaskManagerTest<T extends TasksManager>  {
     @Test
     public void shouldIsTrueCheckCrossing() {
         Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(30),
-                LocalDateTime.of(2022, 12, 12, 12, 00));
+                LocalDateTime.of(2022, 12, 12, 12, 0));
         int taskId1 = manager.addNewTask(task1);
         Task task2 = new Task("Task #2", "Description: Task #2", TaskStatus.NEW, Duration.ofMinutes(30),
                 LocalDateTime.of(2022, 12, 12, 12, 30));
@@ -668,7 +689,7 @@ abstract class TaskManagerTest<T extends TasksManager>  {
     @Test
     public void shouldIsFalseCheckCrossing() {
         Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(60),
-                LocalDateTime.of(2022, 12, 12, 12, 00));
+                LocalDateTime.of(2022, 12, 12, 12, 0));
         int taskId1 = manager.addNewTask(task1);
         Task task2 = new Task("Task #2", "Description: Task #2", TaskStatus.NEW, Duration.ofMinutes(30),
                 LocalDateTime.of(2022, 12, 12, 12, 30));
