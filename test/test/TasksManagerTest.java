@@ -4,7 +4,6 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.TaskStatus;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.TasksManager;
 
@@ -346,10 +345,12 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 //    тесты для void updateTask(Task newTask)
     @Test
     public void shouldStandardBehaviorUpdateTask() {
-        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW);
+        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 1, 0));
         int taskId1 = manager.addNewTask(task1);
 
-        Task updateTask1 = new Task("updateTask #1", "Description: updateTask #1", TaskStatus.NEW);
+        Task updateTask1 = new Task("updateTask #1", "Description: updateTask #1", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 1, 0));
         updateTask1.setId(taskId1);
         manager.updateTask(updateTask1);
 
@@ -358,10 +359,12 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
     @Test
     public void shouldUpdateTaskByEmptyListOfTasks() {
-        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW);
+        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 1, 0));
         int taskId1 = manager.addNewTask(task1);
 
-        Task updateTask1 = new Task("updateTask #1", "Description: updateTask #1", TaskStatus.NEW);
+        Task updateTask1 = new Task("updateTask #1", "Description: updateTask #1", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 1, 0));
         updateTask1.setId(taskId1);
         manager.updateTask(updateTask1);
 
@@ -372,10 +375,12 @@ abstract class TaskManagerTest<T extends TasksManager>  {
 
     @Test
     public void shouldUpdateTaskByTaskIncorrectId() {
-        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW);
+        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 1, 0));
         int taskId1 = manager.addNewTask(task1);
 
-        Task updateTask1 = new Task("updateTask #1", "Description: updateTask #1", TaskStatus.NEW);
+        Task updateTask1 = new Task("updateTask #1", "Description: updateTask #1", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 1, 0));
         updateTask1.setId(taskId1);
         manager.updateTask(updateTask1);
 

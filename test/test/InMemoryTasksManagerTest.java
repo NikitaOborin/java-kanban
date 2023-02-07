@@ -14,5 +14,4 @@ public class InMemoryTasksManagerTest extends test.TaskManagerTest<InMemoryTasks
         manager = new InMemoryTasksManager();
     }
 
-
 }

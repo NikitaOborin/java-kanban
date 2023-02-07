@@ -24,9 +24,9 @@ public class InMemoryTasksManager implements TasksManager {
         }
     }
 
-    protected final HashMap<Integer, Task> tasks = new HashMap<>();
-    protected final HashMap<Integer, Epic> epics = new HashMap<>();
-    protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    protected HashMap<Integer, Task> tasks = new HashMap<>();
+    protected HashMap<Integer, Epic> epics = new HashMap<>();
+    protected HashMap<Integer, Subtask> subtasks = new HashMap<>();
 
     protected final HistoryManager historyManager = Managers.getDefaultHistory();
     private int generatorId = 1;
@@ -37,16 +37,49 @@ public class InMemoryTasksManager implements TasksManager {
         return historyManager;
     }
 
+    public HashMap<Integer, Task> getTasks() {
+        return tasks;
+    }
+
+    public HashMap<Integer, Epic> getEpics() {
+        return epics;
+    }
+
+    public HashMap<Integer, Subtask> getSubtasks() {
+        return subtasks;
+    }
+
     private boolean isCheckCrossing(Task task) {
         boolean isCrossing = false;
+        Duration taskDuration = task.getDuration();
+        LocalDateTime taskStartTime = task.getStartTime();
+
+        // не учитывать пересечение при обновлении таски, если в обновленной версии не менялись Duration и StartTime
+        if (task instanceof Subtask) {
+            if (subtasks.containsKey(task.getId())) {
+                Subtask oldSubtask = subtasks.get(task.getId());
+                if (taskDuration.equals(oldSubtask.getDuration()) || taskStartTime.equals(oldSubtask.getStartTime())) {
+                    return false;
+                }
+            }
+        } else {
+            if (tasks.containsKey(task.getId())) {
+                Task oldTask = tasks.get(task.getId());
+                if (taskDuration.equals(oldTask.getDuration()) || taskStartTime.equals(oldTask.getStartTime())) {
+                    return false;
+                }
+            }
+        }
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
         LocalDateTime startPoint = task.getStartTime();
+
         if (task.getStartTime() != null) {
             while (startPoint.isBefore(task.getStartTime().plus(task.getDuration()))) {
                 if (taskGrid.get(startPoint).equals(true)) {
                     taskGrid.put(startPoint, false);
                 } else {
-                    System.out.println("Задача пересекается по времени с другой задачей во временной отметке"
+                    System.out.println("Задача пересекается по времени с другой задачей во временной отметке "
                             + startPoint.format(formatter));
                     isCrossing = true;
                 }
@@ -91,10 +124,6 @@ public class InMemoryTasksManager implements TasksManager {
         for (Subtask subtask : subtasks.values()) {
             if (!allTasks.contains(subtask))
                 allTasks.add(subtask);
-        }
-        for (Epic epic : epics.values()) {
-            if (!allTasks.contains(epic))
-                allTasks.add(epic);
         }
 
         TreeSet<Task> allTasksSet = new TreeSet<>(startTimeComparator);
@@ -184,17 +213,12 @@ public class InMemoryTasksManager implements TasksManager {
 
     @Override
     public int addNewEpic(Epic epic) {
-        if (!isCheckCrossing(epic)) {
-            epic.setId(generatorId);
-            epics.put(epic.getId(), epic);
-            generatorId++;
+        epic.setId(generatorId);
+        epics.put(epic.getId(), epic);
+        generatorId++;
 
-            updateEpicStatus(epic.getId());
-            return epic.getId();
-        } else {
-            System.out.println("Задача не добавлена");
-            return -1;
-        }
+        updateEpicStatus(epic.getId());
+        return epic.getId();
     }
 
     @Override
@@ -231,13 +255,9 @@ public class InMemoryTasksManager implements TasksManager {
 
     @Override
     public void updateEpic(Epic newEpic) {
-        if (!isCheckCrossing(newEpic)) {
-            if (epics.containsKey(newEpic.getId())) {
-                epics.put(newEpic.getId(), newEpic);
-                updateEpicStatus(newEpic.getId());
-            }
-        } else {
-            System.out.println("Задача не обновлена");
+        if (epics.containsKey(newEpic.getId())) {
+            epics.put(newEpic.getId(), newEpic);
+            updateEpicStatus(newEpic.getId());
         }
     }
 

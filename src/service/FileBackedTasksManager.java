@@ -14,7 +14,7 @@ import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTasksManager {
 
-    protected final Path file;
+    protected Path file;
     private static final String HEAD = "id,type,name,status,description,duration,startTime,endTime,epic";
 
     public FileBackedTasksManager(String path) {
