@@ -1,12 +1,13 @@
 package test;
 
+import model.Epic;
+import model.Subtask;
 import model.Task;
 import model.TaskStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import server.HttpTaskManager;
-import server.HttpTaskServer;
 import server.KVServer;
 import service.Managers;
 
@@ -18,19 +19,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class HttpTaskManagerTest extends test.TaskManagerTest<HttpTaskManager> {
 
     KVServer kvServer = new KVServer();
-    HttpTaskServer httpTaskServer = new HttpTaskServer();
-    HttpTaskManager httpTaskManager;
-    HttpTaskManager httpTaskManager2;
+    HttpTaskManager expectedHttpTaskManager;
 
     public HttpTaskManagerTest() {
         super();
     }
 
-//    @BeforeEach
-//    public void startServers() {
-//        kvServer.start();
-//        httpTaskServer.startHttpTaskServer();
-//    }
+    @BeforeEach
+    public void createManagerAndStartKVServer() {
+        kvServer.start();
+        manager = Managers.getDefaultHttpTaskManager();
+    }
 
     @AfterEach
     public void stopKVServer() {
@@ -38,24 +37,82 @@ public class HttpTaskManagerTest extends test.TaskManagerTest<HttpTaskManager> {
     }
 
     @Test
-    public void shouldGetTasksFromServer() {           // не запускается тест, не могу понять в чем ошибка
-        kvServer.start();
-        httpTaskServer.startHttpTaskServer();
+    public void shouldStandardBehaviorSaveAndLoadManagerOnKVServer() {
+        initTasks();
 
-        httpTaskManager = Managers.getDefaultHttpTaskManager();
+        manager = Managers.getDefaultHttpTaskManager();
+        manager.getTask(taskId1);
+        manager.getEpic(epicId1);
+        manager.getSubtask(subtaskId1);
+        manager.getHistory();
 
+        expectedHttpTaskManager = Managers.getDefaultHttpTaskManager();
+
+        assertEquals(manager.getTask(taskId1), expectedHttpTaskManager.getTask(taskId1));
+    }
+
+    @Test
+    public void shouldEmptySaveAndLoadManagerOnKVServerByEmptyListOfTask() {
         Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(15),
                 LocalDateTime.of(2022, 12, 12, 1, 0));
-        Task task2 = new Task("Task #2", "Description: Task #2", TaskStatus.NEW, Duration.ofMinutes(15),
-                LocalDateTime.of(2022, 12, 12, 1, 15));
-        int taskId1 =  httpTaskManager.addNewTask(task1);
-        int taskId2 = httpTaskManager.addNewTask(task2);
+        int taskId1 = manager.addNewTask(task1);
+        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
+        int epicId1 = manager.addNewEpic(epic1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);;
+        int subtaskId1 = manager.addNewSubtask(subtask1);
 
-        int size1 = httpTaskManager.getTasks().size();
+        manager.getTask(taskId1);
+        manager.getEpic(epicId1);
+        manager.getSubtask(subtaskId1);
+        manager.getHistory();
+        manager.deleteTasks();
+        manager.deleteEpics();
 
-        httpTaskManager2 = Managers.getDefaultHttpTaskManager();
-        int size2 = httpTaskManager2.getTasks().size();
+        expectedHttpTaskManager = Managers.getDefaultHttpTaskManager();
 
-        assertEquals(size1, size2);
+        assertEquals(manager.getTasks(), expectedHttpTaskManager.getTasks());
+        assertEquals(manager.getSubtasks(), expectedHttpTaskManager.getSubtasks());
+        assertEquals(manager.getEpics(), expectedHttpTaskManager.getEpics());
+    }
+
+    @Test
+    public void shouldSaveAndLoadManagerOnKVServerByEmptyEpicSubtasks() {
+        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 1, 0));
+        int taskId1 = manager.addNewTask(task1);
+        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
+        int epicId1 = manager.addNewEpic(epic1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);;
+        int subtaskId1 = manager.addNewSubtask(subtask1);
+
+        manager.getTask(taskId1);
+        manager.getEpic(epicId1);
+        manager.getSubtask(subtaskId1);
+        manager.getHistory();
+        manager.deleteSubtasks();
+
+        expectedHttpTaskManager = Managers.getDefaultHttpTaskManager();
+
+        assertEquals(manager.getEpic(epicId1), expectedHttpTaskManager.getEpic(epicId1));
+    }
+
+    @Test
+    public void shouldSaveAndLoadFileByEmptyHistory() {
+        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(15),
+                LocalDateTime.of(2022, 12, 12, 1, 0));
+        int taskId1 = manager.addNewTask(task1);
+        Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
+        int epicId1 = manager.addNewEpic(epic1);
+        Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);;
+        int subtaskId1 = manager.addNewSubtask(subtask1);
+
+        expectedHttpTaskManager = Managers.getDefaultHttpTaskManager();
+
+        assertEquals(manager.getTasks(), expectedHttpTaskManager.getTasks());
+        assertEquals(manager.getSubtasks(), expectedHttpTaskManager.getSubtasks());
+        assertEquals(manager.getEpics(), expectedHttpTaskManager.getEpics());
     }
 }

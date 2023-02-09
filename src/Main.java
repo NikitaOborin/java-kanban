@@ -12,15 +12,15 @@ import java.time.LocalDateTime;
 public class Main {
 
     public static void main(String[] args) {
-        KVServer kvServer = new KVServer();
-        kvServer.start();
+//        KVServer kvServer = new KVServer();
+//        kvServer.start();
 //        kvServer.stop();
-
+//
 //        HttpTaskServer httpTaskServer = new HttpTaskServer();
 //        httpTaskServer.startHttpTaskServer();
 //        httpTaskServer.stopHttpTaskServer();
-
-//        HttpTaskManager httpTaskManager = Managers.getDefaultHttpTaskManager();
+//
+//        HttpTaskManager httpTaskManager = httpTaskServer.getHttpTaskManager();
 //
 //        Task task1 = new Task("Task #1", "Description: Task #1", TaskStatus.NEW, Duration.ofMinutes(15),
 //                LocalDateTime.of(2022, 12, 12, 1, 0));
@@ -40,7 +40,6 @@ public class Main {
 //                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 1, 45), epicId1);
 //        Subtask subtask3 = new Subtask("Subtask #3-e1", "Description: Subtask #3-e1", TaskStatus.NEW,
 //                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 2, 0), epicId1);
-//
 //        int subtaskId1 = httpTaskManager.addNewSubtask(subtask1);
 //        int subtaskId2 = httpTaskManager.addNewSubtask(subtask2);
 //        int subtaskId3 = httpTaskManager.addNewSubtask(subtask3);

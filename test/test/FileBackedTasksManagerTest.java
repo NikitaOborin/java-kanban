@@ -115,7 +115,7 @@ public class FileBackedTasksManagerTest extends test.TaskManagerTest<FileBackedT
         Epic epic1 = new Epic("Epic #1", "Description: Epic #1");
         int epicId1 = manager.addNewEpic(epic1);
         Subtask subtask1 = new Subtask("Subtask #1-e1", "Description: Subtask #1-e1", TaskStatus.NEW,
-                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);;
+                Duration.ofMinutes(15), LocalDateTime.of(2022, 12, 12, 3, 0), epicId1);
         int subtaskId1 = manager.addNewSubtask(subtask1);
         Path expectedFile = FileBackedTasksManager.loadFromFile(manager.getFile()).getFile();
 

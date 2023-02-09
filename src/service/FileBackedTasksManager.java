@@ -22,11 +22,15 @@ public class FileBackedTasksManager extends InMemoryTasksManager {
         file = Paths.get(path);
     }
 
+    public FileBackedTasksManager() {
+        super();
+    }
+
     public Path getFile() {
         return file;
     }
 
-    private void save() {
+    protected void save() {
         try {
             if (Files.exists(file)) {
                 Files.delete(file);

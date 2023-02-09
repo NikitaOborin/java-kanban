@@ -42,7 +42,9 @@ public class KVServer {
             if ("GET".equals(h.getRequestMethod())) {
                 String key = h.getRequestURI().getPath().substring("/load/".length());
                 String value = data.get(key);
-                sendText(h, value);
+                if (value != null) {
+                    sendText(h, value);
+                }
             } else {
                 System.out.println("/load ждёт GET-запрос, а получил: " + h.getRequestMethod());
                 h.sendResponseHeaders(405, 0);

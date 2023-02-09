@@ -1,139 +1,68 @@
 package server;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import model.Epic;
 import model.Subtask;
 import model.Task;
 
 import service.FileBackedTasksManager;
+import service.Managers;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.ArrayList;
 
 public class HttpTaskManager extends FileBackedTasksManager {
 
-    private final String URL;
     KVTaskClient kvTaskClient;
+    private Gson gson;
 
     public HttpTaskManager(String URL) {
-        super("src\\\\docs\\\\file.csv");
-        this.URL = URL;
+        super();
         kvTaskClient = new KVTaskClient(URL);
-    }
-
-    private String getJsonForTask(HashMap<Integer, Task> tasks) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.serializeNulls();
-        Gson gson = gsonBuilder.create();
-        return gson.toJson(tasks);
-    }
-
-    private String getJsonForEpic(HashMap<Integer, Epic> epics) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.serializeNulls();
-        Gson gson = gsonBuilder.create();
-        return gson.toJson(epics);
-    }
-
-    private String getJsonForSubtask(HashMap<Integer, Subtask> subtasks) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.serializeNulls();
-        Gson gson = gsonBuilder.create();
-        return gson.toJson(subtasks);
-    }
-
-    private void saveOnKVServer() {
-        kvTaskClient.put("Tasks", getJsonForTask(tasks));
-        kvTaskClient.put("Epic", getJsonForEpic(epics));
-        kvTaskClient.put("Subtask", getJsonForSubtask(subtasks));
+        load();
     }
 
     @Override
-    public void deleteTasks() {
-        super.deleteTasks();
-        saveOnKVServer();
+    protected void save() {
+        gson = Managers.getGson();
+        String jsonTasks = gson.toJson(new ArrayList<>(tasks.values()));
+        String jsonSubtasks = gson.toJson(new ArrayList<>(subtasks.values()));
+        String jsonEpics = gson.toJson(new ArrayList<>(epics.values()));
+        String jsonHistory = gson.toJson(new ArrayList<>(historyManager.getHistory()));
+
+        kvTaskClient.put("tasks", jsonTasks);
+        kvTaskClient.put("subtasks", jsonSubtasks);
+        kvTaskClient.put("epics", jsonEpics);
+        kvTaskClient.put("history", jsonHistory);
     }
 
-    @Override
-    public void deleteEpics() {
-        super.deleteEpics();
-        saveOnKVServer();
-    }
+    private void load() {
+        gson = Managers.getGson();
+        ArrayList<Task> tasks = gson.fromJson(kvTaskClient.load("tasks"),new TypeToken<ArrayList<Task>>() {}.getType());
+        if (tasks != null) {
+            for (Task task : tasks) {
+                this.tasks.put(task.getId(), task);
+            }
+        }
+        ArrayList<Subtask> subtasks = gson.fromJson(kvTaskClient.load("subtasks"), new TypeToken<ArrayList<Subtask>>() {}.getType());
+        if (subtasks != null) {
+            for (Subtask subtask : subtasks) {
+                this.subtasks.put(subtask.getId(), subtask);
+            }
+        }
 
-    @Override
-    public void deleteSubtasks() {
-        super.deleteSubtasks();
-        saveOnKVServer();
-    }
+        ArrayList<Epic> epics = gson.fromJson(kvTaskClient.load("epics"), new TypeToken<ArrayList<Epic>>() {}.getType());
+        if (epics != null) {
+            for (Epic epic : epics) {
+                this.epics.put(epic.getId(), epic);
+            }
+        }
 
-    @Override
-    public int addNewTask(Task task) {
-        super.addNewTask(task);
-        saveOnKVServer();
-        return task.getId();
-    }
-
-    @Override
-    public int addNewSubtask(Subtask subtask) {
-        super.addNewSubtask(subtask);
-        saveOnKVServer();
-        return subtask.getId();
-    }
-
-    @Override
-    public int addNewEpic(Epic epic) {
-        super.addNewEpic(epic);
-        saveOnKVServer();
-        return epic.getId();
-    }
-
-    @Override
-    public void updateTask(Task newTask) {
-        super.updateTask(newTask);
-        saveOnKVServer();
-    }
-
-    @Override
-    public void updateEpic(Epic newEpic) {
-        super.updateEpic(newEpic);
-        saveOnKVServer();
-    }
-
-    @Override
-    public void updateSubtask(Subtask newSubtask) {
-        super.updateSubtask(newSubtask);
-        saveOnKVServer();
-    }
-
-    @Override
-    public void deleteTask(int id) {
-        super.deleteTask(id);
-        saveOnKVServer();
-    }
-
-    @Override
-    public void deleteEpic(int id) {
-        super.deleteEpic(id);
-        saveOnKVServer();
-    }
-
-    @Override
-    public void deleteSubtask(int id) {
-        super.deleteSubtask(id);
-        saveOnKVServer();
-    }
-
-    @Override
-    public void updateEpicStatus(int epicId) {
-        super.updateEpicStatus(epicId);
-        saveOnKVServer();
-    }
-
-    @Override
-    public List<Task> getHistory() {
-        super.getHistory();
-        saveOnKVServer();
-        return getHistoryManager().getHistory();
+        ArrayList<Task> history = gson.fromJson(kvTaskClient.load("history"), new TypeToken<ArrayList<Task>>() {}.getType());
+        if (history != null) {
+            for (Task task : history) {
+                this.historyManager.add(task);
+            }
+        }
     }
 }

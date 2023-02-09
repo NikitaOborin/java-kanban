@@ -1,5 +1,7 @@
 package service;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import server.HttpTaskManager;
 
 import java.nio.file.Path;
@@ -20,5 +22,10 @@ public class Managers {
 
     public static HttpTaskManager getDefaultHttpTaskManager() {
         return new HttpTaskManager("http://localhost:8078");
+    }
+
+    public static Gson getGson() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        return gsonBuilder.create();
     }
 }
